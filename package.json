@@ -1,0 +1,24 @@
+{
+  "name": "manufactura-qa-system",
+  "version": "1.0.0",
+  "description": "Sistema de Control de Calidad Manufactura - Sistemas Distribuidos",
+  "private": true,
+  "scripts": {
+    "start-all": "concurrently \"npm run start:gateway\" \"npm run start:defects\" \"npm run start:currency\" \"npm run start:alerts\" \"npm run start:reports\" \"npm run start:client\"",
+    "start:gateway": "cd server/gateway && node index.js",
+    "start:defects": "cd server/defects && node index.js",
+    "start:currency": "cd server/currency && node index.js",
+    "start:alerts": "cd server/alerts && node index.js",
+    "start:reports": "cd server/reports && node index.js",
+    "start:client": "cd client && npm run dev"
+  },
+  "workspaces": [
+    "server/*",
+    "client"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}
