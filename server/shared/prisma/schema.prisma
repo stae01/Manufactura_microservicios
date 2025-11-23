@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Inspector {
+  id           Int          @id @default(autoincrement())
+  nombre       String
+  email        String       @unique
+  inspecciones Inspeccion[]
+}
+
+model Inspeccion {
+  id          Int       @id @default(autoincrement())
+  fecha       DateTime  @default(now())
+  inspectorId Int
+  inspector   Inspector @relation(fields: [inspectorId], references: [id])
+  defectos    Defecto[]
+}
+
+model Defecto {
+  id           Int        @id @default(autoincrement())
+  tipo         String
+  severidad    String // "BAJA", "MEDIA", "ALTA", "CRITICA"
+  descripcion  String
+  costoMXN     Float
+  costoUSD     Float
+  inspeccionId Int?
+  inspeccion   Inspeccion? @relation(fields: [inspeccionId], references: [id])
+  createdAt    DateTime   @default(now())
+  alertas      Alerta[]
+}
+
+model Alerta {
+  id        Int      @id @default(autoincrement())
+  mensaje   String
+  severidad String
+  fecha     DateTime @default(now())
+  defectoId Int?
+  defecto   Defecto? @relation(fields: [defectoId], references: [id])
+}
+
+model Reporte {
+  id        Int      @id @default(autoincrement())
+  contenido String
+  fecha     DateTime @default(now())
+}
