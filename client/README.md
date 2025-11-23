@@ -1,5 +1,44 @@
-# Vue 3 + Vite
+# Manufactura QA - Client
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+Frontend para el Sistema de Control de Calidad de Manufactura. Desarrollado con **Vue 3** y **TailwindCSS**.
 
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+## 🌟 Características
+- **Reporte de Defectos:** Formulario para registrar nuevos defectos. Se comunica con el API Gateway.
+- **Monitoreo de Alertas:** Lista en tiempo real (Polling) de alertas críticas generadas por el sistema.
+
+## 🛠 Setup
+
+### Prerrequisitos
+- Node.js (v18+)
+- El backend debe estar corriendo (Gateway en puerto `3000`).
+
+### Instalación
+Desde la raíz del proyecto (`client/`):
+```bash
+npm install
+```
+
+### Ejecución (Desarrollo)
+```bash
+npm run dev
+```
+La aplicación estará disponible en [http://localhost:5173](http://localhost:5173).
+
+## ⚙️ Configuración
+El frontend está configurado para usar un proxy en desarrollo (`vite.config.js`) que redirige las peticiones `/api` al Gateway:
+
+```javascript
+server: {
+  proxy: {
+    '/api': {
+      target: 'http://localhost:3000', // Gateway URL
+      changeOrigin: true,
+    }
+  }
+}
+```
+
+## 📦 Scripts
+- `npm run dev`: Inicia servidor de desarrollo.
+- `npm run build`: Construye la aplicación para producción.
+- `npm run preview`: Previsualiza el build de producción.
