@@ -1,14 +1,30 @@
+require('dotenv').config();
+
 const express = require('express');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
+const connectDB = require('./config/db');
+const authRoutes = require('./routes/authRoutes');
+const apiRoutes = require('./routes/apiRoutes');
+
+connectDB();
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 
+app.use(express.json());
+
+
+// Rutas
+app.use('/api/auth', authRoutes);  
+app.use('/api', apiRoutes);       
+
+
 // Gateway Routes
-app.use('/api/defectos', createProxyMiddleware({ 
+/*app.use('/api/defectos', authenticateJWT, createProxyMiddleware({ 
     target: 'http://localhost:3001', 
     changeOrigin: true,
     pathRewrite: {
@@ -16,7 +32,7 @@ app.use('/api/defectos', createProxyMiddleware({
     }
 }));
 
-app.use('/api/alertas', createProxyMiddleware({ 
+app.use('/api/alertas', authenticateJWT, createProxyMiddleware({ 
     target: 'http://localhost:3003', 
     changeOrigin: true,
     pathRewrite: {
@@ -24,13 +40,13 @@ app.use('/api/alertas', createProxyMiddleware({
     }
 }));
 
-app.use('/api/divisas', createProxyMiddleware({ 
+app.use('/api/divisas', authenticateJWT, createProxyMiddleware({ 
     target: 'http://localhost:3002', 
     changeOrigin: true,
     pathRewrite: {
         '^/api/divisas': ''
     }
-}));
+}));*/
 
 app.listen(PORT, () => {
     console.log(`Gateway running on port ${PORT}`);
