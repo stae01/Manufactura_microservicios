@@ -1,5 +1,6 @@
 const express = require('express');
 const axios = require('axios');
+const soap = require('soap');
 const cors = require('cors');
 const { prisma, rabbitMQService } = require('../shared');
 
@@ -12,17 +13,34 @@ app.use(express.json());
 // Initialize RabbitMQ connection
 rabbitMQService.connect();
 
+// Helper function to call SOAP service
+const getCurrencyRate = () => {
+    return new Promise((resolve, reject) => {
+        const url = 'http://localhost:3002/wsdl?wsdl';
+        soap.createClient(url, function(err, client) {
+            if (err) return reject(err);
+            client.getRate({}, function(err, result) {
+                if (err) return reject(err);
+                resolve(result.rate);
+            });
+        });
+    });
+};
+
 app.post('/', async (req, res) => {
     try {
         const { tipo, severidad, descripcion, inspectorId } = req.body;
 
-        // 1. Call Currency Service
+        // 1. Call Currency Service (SOAP)
         let rate = 20.50; // Default fallback
         try {
-            const response = await axios.get('http://localhost:3002/rate');
-            rate = response.data.rate;
+            const soapRate = await getCurrencyRate();
+            rate = parseFloat(soapRate);
+            console.log('Currency rate fetched via SOAP:', rate);
         } catch (err) {
-            console.error('Error fetching currency rate:', err.message);
+            console.error('Error fetching currency rate via SOAP:', err.message);
+            // Fallback to REST or default if SOAP fails? 
+            // Original code had fallback to default 20.50, keeping that behavior implicitly by catching error
         }
 
         // Calculate costs (Mock logic: arbitrary base cost * multiplier based on severity)
@@ -68,4 +86,3 @@ app.get('/', async (req, res) => {
 app.listen(PORT, () => {
     console.log(`Defects Service running on port ${PORT}`);
 });
-

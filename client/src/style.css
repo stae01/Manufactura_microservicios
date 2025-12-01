@@ -1,3 +1,61 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  /* Semantic Color Palette */
+  --color-primary: #0f172a;
+  --color-primary-light: #334155;
+  --color-primary-dark: #020617;
+
+  --color-secondary: #64748b;
+  --color-secondary-light: #94a3b8;
+
+  --color-background: #f1f5f9;
+  --color-background-card: #ffffff;
+
+  --color-status-success: #10b981;
+  --color-status-warning: #f59e0b;
+  --color-status-danger: #ef4444;
+  --color-status-info: #3b82f6;
+
+  /* Custom Spacing */
+  --spacing-layout: 2rem;
+  --spacing-card-p: 1.5rem;
+
+  /* Custom Radius */
+  --radius-card: 0.75rem;
+
+  /* Custom Shadows */
+  --shadow-card: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+@layer base {
+  body {
+    @apply bg-background text-slate-800 font-sans antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-semibold tracking-tight text-primary;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply px-4 py-2 rounded-lg font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+  
+  .btn-primary {
+    @apply bg-primary text-white hover:bg-primary-light focus:ring-primary;
+  }
+
+  .btn-danger {
+    @apply bg-status-danger text-white hover:bg-red-600 focus:ring-red-500;
+  }
+
+  .input-field {
+    @apply w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors;
+  }
+
+  .card {
+    @apply bg-background-card rounded-card shadow-card p-card-p border border-gray-100;
+  }
+}

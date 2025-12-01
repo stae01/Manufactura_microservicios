@@ -18,10 +18,10 @@ const verifyCredentials = async (username, password) => {
 };
 
 const generateJWT = (user) => {
-    return jwt.sign({ userId: user._id, username: user.username }, JWT_SECRET, { expiresIn: '1h' });
+    return jwt.sign({ userId: user._id, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
 };
 
-const registerUser = async (username, password) => {
+const registerUser = async (username, password, role) => {
     const userExists = await User.findOne({ username });
     if (userExists) {
         throw new Error('El usuario ya existe');
@@ -29,7 +29,7 @@ const registerUser = async (username, password) => {
 
     const passwordHash = await bcrypt.hash(password, 10);
 
-    const newUser = new User({ username, passwordHash });
+    const newUser = new User({ username, passwordHash, role });
     await newUser.save();
     return newUser;  
 };

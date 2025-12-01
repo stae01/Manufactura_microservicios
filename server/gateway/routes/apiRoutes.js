@@ -1,6 +1,7 @@
 const express = require('express');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const authenticateJWT = require('../middlewares/authenticateJWT'); // Validar JWT
+const authorizeRole = require('../middlewares/authorizeRole'); // Validar Rol
 
 const router = express.Router();
 
@@ -22,7 +23,8 @@ router.use('/api/divisas', authenticateJWT, createProxyMiddleware({
     }
 }));
 
-router.use('/api/alertas', authenticateJWT, createProxyMiddleware({ 
+// SOLO ADMIN: Proxy para alertas
+router.use('/api/alertas', authenticateJWT, authorizeRole('admin'), createProxyMiddleware({ 
     target: 'http://localhost:3003', 
     changeOrigin: true,
     pathRewrite: {

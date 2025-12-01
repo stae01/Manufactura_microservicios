@@ -15,10 +15,10 @@ const login = async (req, res) => {
 };
 
 const registro = async (req, res) => {
-    const { username, password } = req.body;
+    const { username, password, role } = req.body;
 
     try {
-        const newUser = await authService.registerUser(username, password);
+        const newUser = await authService.registerUser(username, password, role);
 
         res.status(201).json({ message: 'Usuario registrado con éxito', user: newUser });
     } catch (err) {

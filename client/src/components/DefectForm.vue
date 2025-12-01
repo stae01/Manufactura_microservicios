@@ -34,30 +34,50 @@ const submit = async () => {
 </script>
 
 <template>
-  <div class="bg-white p-6 rounded shadow-md">
-    <h2 class="text-xl font-bold mb-4">Reportar Defecto</h2>
-    <form @submit.prevent="submit" class="space-y-4">
-      <div>
-        <label class="block text-sm font-medium">Tipo de Defecto</label>
-        <input v-model="tipo" type="text" class="w-full border p-2 rounded" required />
+  <div class="card h-full flex flex-col">
+    <div class="flex items-center space-x-2 mb-6 border-b border-gray-100 pb-4">
+      <div class="bg-primary/10 p-2 rounded-lg text-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
       </div>
+      <h2 class="text-xl font-bold">Reportar Defecto</h2>
+    </div>
+
+    <form @submit.prevent="submit" class="space-y-5 flex-1">
       <div>
-        <label class="block text-sm font-medium">Severidad</label>
-        <select v-model="severidad" class="w-full border p-2 rounded">
-          <option value="BAJA">Baja</option>
-          <option value="MEDIA">Media</option>
-          <option value="ALTA">Alta</option>
-          <option value="CRITICA">Crítica</option>
-        </select>
+        <label class="block text-sm font-medium mb-1 text-slate-700">Tipo de Defecto</label>
+        <input v-model="tipo" type="text" class="input-field" placeholder="Ej. Fisura en carcasa" required />
       </div>
+      
       <div>
-        <label class="block text-sm font-medium">Descripción</label>
-        <textarea v-model="descripcion" class="w-full border p-2 rounded" required></textarea>
+        <label class="block text-sm font-medium mb-1 text-slate-700">Severidad</label>
+        <div class="relative">
+          <select v-model="severidad" class="input-field appearance-none bg-white cursor-pointer">
+            <option value="BAJA">Baja</option>
+            <option value="MEDIA">Media</option>
+            <option value="ALTA">Alta</option>
+            <option value="CRITICA">Crítica</option>
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+          </div>
+        </div>
       </div>
-      <button type="submit" :disabled="loading" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50">
-        {{ loading ? 'Enviando...' : 'Registrar Defecto' }}
-      </button>
+      
+      <div>
+        <label class="block text-sm font-medium mb-1 text-slate-700">Descripción Detallada</label>
+        <textarea v-model="descripcion" rows="4" class="input-field resize-none" placeholder="Describa el problema observado..." required></textarea>
+      </div>
+      
+      <div class="pt-2">
+        <button type="submit" :disabled="loading" class="btn btn-primary w-full flex justify-center items-center space-x-2">
+           <svg v-if="!loading" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>{{ loading ? 'Enviando Reporte...' : 'Registrar Defecto' }}</span>
+        </button>
+      </div>
     </form>
   </div>
 </template>
-

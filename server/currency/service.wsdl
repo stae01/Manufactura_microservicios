@@ -1,0 +1,45 @@
+<definitions name="CurrencyService"
+   targetNamespace="http://www.examples.com/wsdl/CurrencyService.wsdl"
+   xmlns="http://schemas.xmlsoap.org/wsdl/"
+   xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+   xmlns:tns="http://www.examples.com/wsdl/CurrencyService.wsdl"
+   xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+   <message name="GetRateRequest">
+      <part name="currency" type="xsd:string"/>
+   </message>
+
+   <message name="GetRateResponse">
+      <part name="rate" type="xsd:float"/>
+   </message>
+
+   <portType name="CurrencyPort">
+      <operation name="getRate">
+         <input message="tns:GetRateRequest"/>
+         <output message="tns:GetRateResponse"/>
+      </operation>
+   </portType>
+
+   <binding name="CurrencyBinding" type="tns:CurrencyPort">
+      <soap:binding style="rpc"
+         transport="http://schemas.xmlsoap.org/soap/http"/>
+      <operation name="getRate">
+         <soap:operation soapAction="getRate"/>
+         <input>
+            <soap:body use="encoded" namespace="urn:examples:currencyservice"
+               encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+         </input>
+         <output>
+            <soap:body use="encoded" namespace="urn:examples:currencyservice"
+               encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"/>
+         </output>
+      </operation>
+   </binding>
+
+   <service name="CurrencyService">
+      <documentation>WSDL File for CurrencyService</documentation>
+      <port binding="tns:CurrencyBinding" name="CurrencyPort">
+         <soap:address location="http://localhost:3002/wsdl"/>
+      </port>
+   </service>
+</definitions>
