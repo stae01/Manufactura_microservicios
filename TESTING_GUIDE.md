@@ -1,6 +1,6 @@
 # 🧪 Guía de Pruebas - Sistema de Control de Calidad
 
-Esta guía detalla los pasos para verificar el funcionamiento completo del sistema durante la presentación, cubriendo los roles de usuario, la generación de alertas en tiempo real y la arquitectura subyacente (SOAP/RabbitMQ).
+Esta guía detalla los pasos para verificar el funcionamiento completo del sistema, cubriendo los roles de usuario, la generación de alertas en tiempo real y la arquitectura subyacente (SOAP/RabbitMQ).
 
 ## 📋 Prerrequisitos
 
@@ -67,9 +67,9 @@ Esta guía detalla los pasos para verificar el funcionamiento completo del siste
 ---
 
 ## ⚙️ Verificación Técnica (Behind the Scenes)
-*Para mostrar al profesor/clase que la arquitectura funciona.*
+*Para mostrar que la arquitectura funciona.*
 
-Mientras realizas las pruebas anteriores, muestra la terminal donde corre `npm run start-all`:
+Mientras realizas las pruebas anteriores, se muestra la terminal donde corre `npm run start-all`:
 
 1. **Invocación Remota SOAP:**
    - Cuando registras un defecto, busca en la terminal del servicio **Defects** (etiqueta `[1]`):

@@ -3,7 +3,6 @@ require('dotenv').config();
 const express = require('express');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const cors = require('cors');
-const jwt = require('jsonwebtoken');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const apiRoutes = require('./routes/apiRoutes');
@@ -15,40 +14,30 @@ const PORT = process.env.PORT || 3000;
 
 app.use(cors());
 
-app.use(express.json());
+// MOVE API ROUTES BEFORE BODY PARSER
+// Proxy routes must handle their own body parsing or streaming.
+// If we use express.json() globally before the proxy, it consumes the stream.
+// authRoutes NEEDS body parser, so we can mount it specifically for auth, 
+// OR apply express.json() only to routes that are NOT proxied.
 
+// Option A: Apply express.json() ONLY to /api/auth
+// app.use('/api/auth', express.json(), authRoutes);
 
-// Rutas
-app.use('/api/auth', authRoutes);  
-app.use('/api', apiRoutes);       
+// Option B (Cleaner for this structure): Move global parser below proxy routes? 
+// No, because authRoutes is also under /api.
 
+// Solution: Use a router for Auth that has the middleware built-in, 
+// and keep API routes raw for the proxy to handle.
 
-// Gateway Routes
-/*app.use('/api/defectos', authenticateJWT, createProxyMiddleware({ 
-    target: 'http://localhost:3001', 
-    changeOrigin: true,
-    pathRewrite: {
-        '^/api/defectos': '' // Remove /api/defectos prefix when forwarding
-    }
-}));
+// 1. Auth Routes (Need JSON parsing)
+app.use('/api/auth', express.json(), authRoutes);
 
-app.use('/api/alertas', authenticateJWT, createProxyMiddleware({ 
-    target: 'http://localhost:3003', 
-    changeOrigin: true,
-    pathRewrite: {
-        '^/api/alertas': ''
-    }
-}));
+// 2. API Routes (Proxy - Do NOT parse JSON here globally)
+app.use('/api', apiRoutes);
 
-app.use('/api/divisas', authenticateJWT, createProxyMiddleware({ 
-    target: 'http://localhost:3002', 
-    changeOrigin: true,
-    pathRewrite: {
-        '^/api/divisas': ''
-    }
-}));*/
+// If you have other non-proxy routes that need JSON:
+// app.use(express.json()); // Global fallback for subsequent routes if any
 
 app.listen(PORT, () => {
     console.log(`Gateway running on port ${PORT}`);
 });
-
