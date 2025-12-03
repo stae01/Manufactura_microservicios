@@ -115,7 +115,7 @@ const getSeverityClass = (sev) => {
       <p>No hay alertas activas en este momento.</p>
     </div>
     
-    <-- Lista de alertas -->
+    <!-- Lista de alertas -->
     <div
       v-else
       class="flex-1 min-h-0 space-y-3 overflow-y-auto pr-2 custom-scrollbar"
