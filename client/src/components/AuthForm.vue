@@ -41,7 +41,7 @@ const submit = async () => {
 
   const trimmedUser = username.value.trim();
 
-  // 🔹 Validación diferente según modo
+  // Validación diferente según modo
   if (isLogin.value) {
     // LOGIN → solo que no estén vacíos
     if (!trimmedUser) {

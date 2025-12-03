@@ -30,6 +30,7 @@ model Defecto {
   tipo         String
   severidad    String // "BAJA", "MEDIA", "ALTA", "CRITICA"
   descripcion  String
+  lote         String  
   costoMXN     Float
   costoUSD     Float
   inspeccionId Int?

@@ -12,30 +12,87 @@ const props = defineProps({
   },
 });
 
-const tipo = ref('');
+// catálogo de tipos de defecto (ajústalo a tu proceso real)
+const defectTypes = [
+  'Fisura en carcasa',
+  'Desalineación',
+  'Falta de componente',
+  'Daño superficial',
+  'Error de ensamblaje',
+  'Medida fuera de tolerancia',
+];
+
+const tipo = ref(defectTypes[0]);
 const severidad = ref('BAJA');
 const descripcion = ref('');
+const lote = ref('');
+const costoMXN = ref(''); 
+
 const loading = ref(false);
 const error = ref('');
 const success = ref('');
 
+// 🔹 Sanitizar el input de costo: solo números, un punto, máx 2 decimales
+const handleCostoInput = (event) => {
+  let value = event.target.value;
+
+  // 1) Quitar todo lo que no sea dígito o punto
+  value = value.replace(/[^0-9.]/g, '');
+
+  // 2) Permitir solo un punto
+  const parts = value.split('.');
+  if (parts.length > 2) {
+    value = parts[0] + '.' + parts.slice(1).join('');
+  }
+
+  // 3) Limitar a 2 decimales
+  let [intPart, decPart] = value.split('.');
+  if (decPart && decPart.length > 2) {
+    decPart = decPart.slice(0, 2);
+    value = intPart + '.' + decPart;
+  }
+
+  // actualizar input y modelo
+  event.target.value = value;
+  costoMXN.value = value;
+};
+
 const submit = async () => {
-  loading.value = true;
   error.value = '';
   success.value = '';
+
+  // Validaciones básicas extra
+  if (!lote.value.trim()) {
+    error.value = 'El lote es requerido.';
+    return;
+  }
+
+  const numericCosto = Number(costoMXN.value);
+
+  if (!costoMXN.value || Number.isNaN(numericCosto) || numericCosto <= 0) {
+    error.value = 'El costo debe ser un número mayor a 0 con hasta 2 decimales.';
+    return;
+  }
+
+  loading.value = true;
 
   try {
     await axios.post('/api/defectos', {
       tipo: tipo.value,
       severidad: severidad.value,
       descripcion: descripcion.value,
+      lote: lote.value.trim(),
+      costoMXN: numericCosto,
       inspectorId: props.inspectorId || 1, // fallback por si acaso
     });
 
     // Clear form
-    tipo.value = '';
+    tipo.value = defectTypes[0];
     severidad.value = 'BAJA';
     descripcion.value = '';
+    lote.value = '';
+    costoMXN.value = '';
+
     success.value = 'Defecto reportado con éxito';
     emit('defect-created');
   } catch (e) {
@@ -55,7 +112,7 @@ const submit = async () => {
 </script>
 
 <template>
-  <div class="card h-full flex flex-col">
+  <div class="card flex flex-col">
     <div class="flex items-center space-x-2 mb-6 border-b border-gray-100 pb-4">
       <div class="bg-primary/10 p-2 rounded-lg text-primary">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -85,23 +142,45 @@ const submit = async () => {
     </div>
 
     <form @submit.prevent="submit" class="space-y-5 flex-1">
+      <!-- Tipo de defecto -->
       <div>
-        <label class="block text-sm font-medium mb-1 text-slate-700">Tipo de Defecto</label>
-        <input
-          v-model="tipo"
-          type="text"
-          class="input-field"
-          placeholder="Ej. Fisura en carcasa"
-          required
-        />
+        <label class="block text-sm font-medium mb-1 text-slate-700">
+          Tipo de Defecto
+        </label>
+        <div class="relative">
+          <select
+            v-model="tipo"
+            class="input-field select-field appearance-none bg-white cursor-pointer"
+            required
+          >
+            <option
+              v-for="t in defectTypes"
+              :key="t"
+              :value="t"
+            >
+              {{ t }}
+            </option>
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M19 9l-7 7-7-7"
+              ></path>
+            </svg>
+          </div>
+        </div>
       </div>
-      
+
+      <!-- Severidad -->
       <div>
         <label class="block text-sm font-medium mb-1 text-slate-700">Severidad</label>
         <div class="relative">
           <select
             v-model="severidad"
-            class="input-field appearance-none bg-white cursor-pointer"
+            class="input-field select-field appearance-none bg-white cursor-pointer"
           >
             <option value="BAJA">Baja</option>
             <option value="MEDIA">Media</option>
@@ -120,7 +199,35 @@ const submit = async () => {
           </div>
         </div>
       </div>
+
+      <!-- Lote -->
+      <div>
+        <label class="block text-sm font-medium mb-1 text-slate-700">Lote</label>
+        <input
+          v-model="lote"
+          type="text"
+          class="input-field"
+          placeholder="Ej. L-20251203-01"
+          required
+        />
+      </div>
+
+      <!-- Costo por pieza (MXN) -->
+      <div>
+        <label class="block text-sm font-medium mb-1 text-slate-700">
+          Costo por pieza (MXN)
+        </label>
+        <input
+          :value="costoMXN"
+          @input="handleCostoInput"
+          inputmode="decimal"
+          class="input-field"
+          placeholder="Ej. 100.00"
+          required
+        />
+      </div>
       
+      <!-- Descripcion -->
       <div>
         <label class="block text-sm font-medium mb-1 text-slate-700">Descripción Detallada</label>
         <textarea
@@ -159,3 +266,14 @@ const submit = async () => {
     </form>
   </div>
 </template>
+
+<style scoped>
+.select-field {
+  background-color: #f8fafc;
+}
+
+.select-field option {
+  background-color: #0f172a;
+  color: #e2e8f0;
+}
+</style>

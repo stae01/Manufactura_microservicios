@@ -5,6 +5,7 @@ import axios from 'axios';
 const alerts = ref([]);
 const loading = ref(false);
 const error = ref('');
+const hasLoadedOnce = ref(false); 
 let interval;
 
 const fetchAlerts = async () => {
@@ -21,13 +22,13 @@ const fetchAlerts = async () => {
 
     if (status === 403) {
       error.value = 'No tienes permisos para ver las alertas.';
-      // ya no tiene caso seguir haciendo polling
       clearInterval(interval);
     } else {
       error.value = 'Error al cargar las alertas.';
     }
   } finally {
     loading.value = false;
+    hasLoadedOnce.value = true; 
   }
 };
 
@@ -51,7 +52,7 @@ const getSeverityClass = (sev) => {
 </script>
 
 <template>
-  <div class="card h-full flex flex-col">
+  <div class="card flex flex-col max-h-[650px]">
     <div class="flex items-center space-x-2 mb-6 border-b border-gray-100 pb-4">
       <div class="bg-status-danger/10 p-2 rounded-lg text-status-danger animate-pulse">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -66,6 +67,18 @@ const getSeverityClass = (sev) => {
       >
         {{ alerts.length }}
       </span>
+
+      <!-- mini spinner en el header mientras hace polling, sin romper el layout -->
+      <svg
+        v-if="loading && !error"
+        class="w-4 h-4 ml-auto animate-spin text-gray-300"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke-width="4"></circle>
+        <path class="opacity-75" stroke-width="4" d="M4 12a8 8 0 018-8"></path>
+      </svg>
     </div>
 
     <!-- Mensaje de error -->
@@ -76,9 +89,9 @@ const getSeverityClass = (sev) => {
       {{ error }}
     </div>
 
-    <!-- Estado cargando (solo si no hay error) -->
+    <!-- Estado cargando SOLO en el primer load -->
     <div
-      v-else-if="loading && alerts.length === 0"
+      v-else-if="loading && !hasLoadedOnce"
       class="flex-1 flex flex-col items-center justify-center text-secondary py-12 text-sm"
     >
       <svg class="w-6 h-6 mb-3 animate-spin text-gray-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -90,7 +103,7 @@ const getSeverityClass = (sev) => {
       <p>Cargando alertas...</p>
     </div>
     
-    <!-- Sin alertas -->
+   
     <div
       v-else-if="alerts.length === 0"
       class="flex-1 flex flex-col items-center justify-center text-secondary py-12"
@@ -102,10 +115,10 @@ const getSeverityClass = (sev) => {
       <p>No hay alertas activas en este momento.</p>
     </div>
     
-    <!-- Lista de alertas -->
+    <-- Lista de alertas -->
     <div
       v-else
-      class="space-y-3 overflow-y-auto max-h-[600px] pr-2 custom-scrollbar"
+      class="flex-1 min-h-0 space-y-3 overflow-y-auto pr-2 custom-scrollbar"
     >
       <div
         v-for="alerta in alerts"
