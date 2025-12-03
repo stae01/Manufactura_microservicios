@@ -1,37 +1,42 @@
 // client/src/main.js
 import { createApp } from 'vue';
-import App from './App.vue';
-import './style.css';
 import axios from 'axios';
+import './style.css';
+import App from './App.vue';
 
-// Si ya hay token guardado, lo ponemos en el header
-const token = localStorage.getItem('token');
-if (token) {
-  axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+// 1) Si ya hay token guardado, lo ponemos en el header
+const savedToken = localStorage.getItem('token');
+if (savedToken) {
+  axios.defaults.headers.common['Authorization'] = `Bearer ${savedToken}`;
 }
 
-// Interceptor para respuestas: maneja errores 401/403
+// 2) Interceptor global de respuestas
 axios.interceptors.response.use(
   (response) => response,
   (error) => {
     const status = error.response?.status;
+    const config = error.config || {};
 
-    if (status === 401) {
-      // Token inválido o expirado → cerrar sesión y recargar a login
+    // Rutas de auth: NO queremos tratarlas como "sesión expirada"
+    const isAuthRoute =
+      typeof config.url === 'string' &&
+      (config.url.startsWith('/api/auth/login') ||
+       config.url.startsWith('/api/auth/registro'));
+
+    // Solo consideramos "sesión expirada" si:
+    // - es 401
+    // - NO es una ruta de auth
+    if (status === 401 && !isAuthRoute) {
+      // Limpiamos sesión
       localStorage.removeItem('token');
       localStorage.removeItem('role');
       localStorage.removeItem('username');
+      localStorage.removeItem('userId');
       delete axios.defaults.headers.common['Authorization'];
 
-      // opcional: puedes mostrar un alert antes
-      alert('Tu sesión ha expirado. Por favor inicia sesión nuevamente.');
-
-      // fuerza recarga a estado inicial
+      alert('Tu sesión ha expirado o el token no es válido. Por favor inicia sesión de nuevo.');
       window.location.reload();
     }
-
-    // Puedes manejar 403 si quieres un mensaje global
-    // if (status === 403) { ... }
 
     return Promise.reject(error);
   }
