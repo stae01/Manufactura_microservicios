@@ -14,40 +14,91 @@ const loading = ref(false);
 const toggleMode = () => {
   isLogin.value = !isLogin.value;
   error.value = '';
+  // opcional: limpiar contraseña al cambiar de modo
+  password.value = '';
+};
+
+// helper para construir mensaje de errores del backend
+const extractBackendError = (e) => {
+  const data = e.response?.data;
+
+  if (!data) return 'Error en la operación';
+
+  // si viene como { errors: { campo: "mensaje" } }
+  if (data.errors && typeof data.errors === 'object') {
+    const firstKey = Object.keys(data.errors)[0];
+    if (firstKey) return data.errors[firstKey];
+  }
+
+  // si viene como { message: "mensaje" }
+  if (data.message) return data.message;
+
+  return 'Error en la operación';
 };
 
 const submit = async () => {
   error.value = '';
+
+  const trimmedUser = username.value.trim();
+
+  // 🔹 Validación diferente según modo
+  if (isLogin.value) {
+    // LOGIN → solo que no estén vacíos
+    if (!trimmedUser) {
+      error.value = 'El usuario es requerido.';
+      return;
+    }
+    if (!password.value) {
+      error.value = 'La contraseña es requerida.';
+      return;
+    }
+  } else {
+    // REGISTRO → validación fuerte
+    if (trimmedUser.length < 3) {
+      error.value = 'El usuario debe tener al menos 3 caracteres.';
+      return;
+    }
+
+    if (password.value.length < 6) {
+      error.value = 'La contraseña debe tener al menos 6 caracteres.';
+      return;
+    }
+  }
+
   loading.value = true;
   try {
     if (isLogin.value) {
-      // Login
+      // LOGIN
       const res = await axios.post('/api/auth/login', {
-        username: username.value,
+        username: trimmedUser,
         password: password.value
       });
+
       const token = res.data.token;
-      
       const payload = JSON.parse(atob(token.split('.')[1]));
-      
-      emit('login-success', { token, username: username.value, role: payload.role });
+
+      emit('login-success', { token, username: trimmedUser, role: payload.role });
     } else {
-      // Register
+      // REGISTRO
       await axios.post('/api/auth/registro', {
-        username: username.value,
+        username: trimmedUser,
         password: password.value,
-        role: role.value
+        role: role.value        // "user" o "admin"
       });
+
       isLogin.value = true;
       alert('Registro exitoso. Por favor inicia sesión.');
+      password.value = '';
     }
   } catch (e) {
-    error.value = e.response?.data?.message || 'Error en la operación';
+    error.value = extractBackendError(e);
   } finally {
     loading.value = false;
   }
 };
 </script>
+
+
 
 <template>
   <div class="min-h-screen flex items-center justify-center bg-background p-4">
